@@ -1,0 +1,252 @@
+## NOZZLE MAINTENANCE
+
+Wire Nozzle Maintenance: Inspection and Replacement
+Wire nozzles are consumable parts of the Meltio M600 and should be checked and replaced regularly. The normal life of this consumable is between 50 - 300 h.
+To check the wear of the wire nozzles it is recommended to visually inspect them. An easy way to do this is to take a clear picture of the wire nozzle from behind and have the material around 7 mm out of the wire nozzle for gently moving it with your fingers.
+The key point to avoid print defects due to wire nozzle wear is that the material should not move enough in the wire nozzle that it loses the focus from the 9 laser beams of the Meltio M600 head.
+To check the condition of the nozzle it is recommended to follow the next steps:
+1. Unscrew the shield gas nozzle by gently turning it clockwise.
+2. Remove the shield gas nozzle with the 6mm spanner and store it in your tool box until the process is finished.
+3. Check the nozzle for wear. Refer to the diagram below:
+● A: Severely worn nozzle (replace immediately)
+● B: Moderately worn nozzle (ready to replace)
+● C: New nozzle (good condition)
+4. After the checking process, if your nozzle is not as wear as (B), you can keep using your wire nozzle.
+5. Assembly back the nozzle if applied and the shield gas nozzle to finish this task.
+
+---------------------
+
+## STORAGE CONDITIONS
+The following conditions need to be met for storing the Meltio M600.
+Temperature
+0 - 50 Degrees Celsius
+Altitude
+< 4000 m ASL
+Humidity
+< 70% - Non-condensing
+Boundary Conditions
+Stored inside in dry conditions on level flooring.
+When preparing the printer for storage or shipment, please follow the uncrating instructions in reverse. If the device is to be stored in a cold environment it is important to ensure the cooling system is filled with the correct mixture of coolant (See Maintenance Section).
+Note: The system should never be stored
+
+---------------------
+
+## OPERATING CONDITIONS
+The operating conditions of the machine are more stringent than those for storage. It is important to take the necessary precautions to prevent condensation due to the active refrigeration of the cooling system in hot and humid environments. Furthermore, operating the system at high ambient temperatures further increases the load on the cooling system, resulting in increased electrical consumption.
+Operating Conditions
+Temperature
+5 - 30 °C
+Altitude
+< 3000 m ASL Meltio M600 User Manual v2.3 19
+Humidity
+See dew-point-chart below - Non-condensing
+Cooling system Temperature
+18-22 °C
+The maximally permissible humidity depends on two additional factors: the ambient temperature and the temperature set point of the chiller. The chiller temperature may be set between 18 and 22 degrees celsius. It is preferable to operate the laser system at a lower temperature to ensure its longevity and performance. However, condensation must be avoided as it can seriously damage the system. It is therefore recommended to select the lowest chiller temperature possible while maintaining a safe margin (3 °C) to avoid condensation.
+The chart below may be used to select the ideal chiller temperature and determine if additional humidity control measures are necessary.
+
+====================  DEW POINT TABLE  ====================
+
+                  Relative Humidity
+Air Temp     40%            50%            60%            70%            80%            90%            100%
+-------------------------------------------------------------------------------------------------------------
+16°C      2°C(light-blue)  6°C(light-blue)  8°C(light-blue)  11°C(dark-blue)  13°C(light-blue)  14°C(light-blue)  16°C(light-blue)
+
+18°C      4°C(light-blue)  7°C(light-blue) 10°C(light-blue) 12°C(light-blue) 15°C(light-blue) 16°C(light-blue) 18°C(yellow)
+
+20°C      6°C(light-blue)  9°C(light-blue) 12°C(light-blue) 14°C(dark-blue)  16°C(light-blue) 18°C(yellow)      20°C(yellow)
+
+22°C      8°C(light-blue) 11°C(light-blue) 14°C(light-blue) 16°C(dark-blue)  18°C(yellow)     20°C(red)         22°C(red)
+
+24°C     10°C(light-blue) 13°C(light-blue) 16°C(light-blue) 18°C(yellow)     20°C(yellow)     22°C(red)         24°C(red)
+
+26°C     11°C(light-blue) 15°C(light-blue) 18°C(yellow)      20°C(yellow)     22°C(red)        24°C(red)         26°C(red)
+
+28°C     13°C(light-blue) 17°C(light-blue) 20°C(yellow)      22°C(yellow)     24°C(red)        26°C(red)         28°C(red)
+
+30°C     15°C(light-blue) 19°C(light-blue) 21°C(yellow)      24°C(yellow)     26°C(red)        28°C(red)         30°C(red)
+
+32°C     17°C(light-blue) 20°C(light-blue) 23°C(yellow)      26°C(red)        28°C(red)        30°C(red)         32°C(red)
+
+34°C     19°C(light-blue) 22°C(red)        25°C(red)         28°C(red)        30°C(red)        32°C(red)         34°C(red)
+
+
+==========================  LEGEND  ==========================
+
+Light Blue   – 18°C Best
+Dark Blue    – 20°C OK
+Yellow       – 22°C Not recommended
+Red          – Do not operate in these conditions
+
+
+The chart marks the dew point for a range of temperature and humidity combinations. It is inadvisable to set the chiller temperature below the dew point as this may result in condensation on critical surfaces within the deposition head, potentially leading to severe damage to the electro-optical assembly. The colors indicate the recommended chiller set point.
+Note: The chiller temperature should be selected based on the worst-case conditions, which would be the highest temperature and humidity. Beware of seasonal changes in humidity and temperature and re-evaluate continuously in order to maintain optimal conditions.
+
+---------------------
+
+## SYSTEM SPECS
+
+====================  SYSTEM SPECIFICATIONS  ====================
+
++------------------------+------------------------------------------------------------+
+| Dimensions             | 1050x1150x1950 mm                                          |
++------------------------+------------------------------------------------------------+
+| Build Envelope         | 300x400x600 mm                                             |
++------------------------+------------------------------------------------------------+
+| System Weight          | 800 kg                                                     |
++------------------------+------------------------------------------------------------+
+| Movement system        | Servo motor linear axis with absolute encoder              |
+|                        | on all axes.                                               |
++------------------------+------------------------------------------------------------+
+| Positioning accuracy   | 100um                                                      |
++------------------------+------------------------------------------------------------+
+| Filtration system      | 3 stage particulate and chemical filtration included.      |
++------------------------+------------------------------------------------------------+
+| Environment control    | Control O2 and humidity level.                             |
++------------------------+------------------------------------------------------------+
+| Laser type             | 9x direct diode lasers                                     |
++------------------------+------------------------------------------------------------+
+
+
+==========================  LASER / PROCESS DETAILS  ==========================
+
++--------------------------+-----------------------------------------------------------+
+| Laser wavelength         | 450 nm                                                     |
++--------------------------+-----------------------------------------------------------+
+| Total Laser Power        | 1000 W                                                     |
++--------------------------+-----------------------------------------------------------+
+| Power input              | 3W + N + PE: 380-415V 25A Max                              |
+|                          | 3W + PE: 200-240V 40A Max                                  |
++--------------------------+-----------------------------------------------------------+
+| Power consumption        | 4 – 6 kWh Average depending on selected options            |
++--------------------------+-----------------------------------------------------------+
+| Process control          | Closed loop, laser and wire modulation                     |
++--------------------------+-----------------------------------------------------------+
+| Touch probe              | Automated XYZ touchprobe integrated                        |
++--------------------------+-----------------------------------------------------------+
+| Enclosure                | Laser safe, fully inert                                    |
++--------------------------+-----------------------------------------------------------+
+| Interface                | USB, Ethernet                                              |
++--------------------------+-----------------------------------------------------------+
+| Cooling                  | Active water-cooled chiller included                       |
++--------------------------+-----------------------------------------------------------+
+| Wire feedstock diameter  | 0.8–1.2 mm                                                 |
++--------------------------+-----------------------------------------------------------+
+| Wire feedstock spool     | BS300 or external wire drum                                |
++--------------------------+-----------------------------------------------------------+
+| Shield gas input         | 4 bar                                                      |
++--------------------------+-----------------------------------------------------------+
+| Compressed Air Input     | 7 – 8 bar                                                  |
++--------------------------+-----------------------------------------------------------+
+
+
+---------------------
+
+## NOISE LEVELS
+
+The Meltio M600 generates noise primarily from its fans and the chiller system. The noise levels can be categorized as follows:
+● Fans: The noise generated by the machine's fans is approximately 44.5 dB.
+● Chiller: The chiller system, which is the noisiest component of the setup, produces noise levels reaching up to 69 dB.
+Operators should consider these noise levels when setting up the machine in a shared workspace. If necessary, suitable noise mitigation measures, such as sound insulation or hearing protection, may be used to comply with workplace safety standards.
+
+---------------------
+
+##AL06 ERROR
+
+Regulate cooling distribution (flowmeters)
+If the value is higher than 0.50MPa or the chiller display shows AL06 error, turn off the chiller, carefully adjust the M600 valves as explained below and repeat the cooling process until the displayed value is around 0.45-0.48MPa.
+Open the left side panel of the M600 to access to the flow meters and gently open the following valves:
+O2 sensor - from 1L/min to 1.4L/min
+Probe - from 1L/min to 1.4L/min
+Door - from 1L/min to 1.4L/min
+As a consequence, the head and gantry values will be auto regulated approximately to:
+Head - 8L/min
+Gantry - 2.4L/min
+In this way, the pressure value displayed in the chiller should be below 0.45-0.48MPa.
+
+Regulate chiller bypass
+If the chiller still displays the error, adjust the chiller bypass by opening the valve little by little and repeat the cooling process until the displayed value is around 0.45-0.48MPa.
+Once the chiller is running without any alarm, check the flow meters located on the Meltio M600 left side panel:
+From left to right, approximately values should be set to:
+Head - 8 - 8.5L/min (error displayed if below 7.8L/min)
+Gantry - 2.2 - 2.5L/min (error displayed if below 2.1L/min)
+O2 sensor - 1 - 1.5L/min (error displayed if below 0.7L/min)
+Probe - 1 - 1.5L/min (error displayed if below 0.7L/min)
+Door - 1 - 1.5L/min (error displayed if below 0.7L/min)
+
+-----------------
+
+## ARGON GAS LEVEL MAINTENANCE
+Argon gas level maintenance: inspection and replacement.
+There are 3 racks of argon gas bottles. Every rack is called “register” plus a number.
+We have register1 which refers to rack 1, register2 refering to rack 2 and register3 which refers to rack 3.
+Actions based on the volume of every register:
+When the register number is 200 or above, the rack is full. No action to be taken.
+When the register number is between 50 and below 200, the rack is in operation. No action to be taken.
+When the register number is below 50, the rack is running out of argon gas. There’s a need for replacement. In this case the recommended actions for the chief operator are:
+1.	Inform about all the register values and make focus on the ones below 50
+2.	Suggest to reconfirm the realtime values or the registers below 50 in the operations room
+3.	Suggest to review the current stock of argon gas and place a purchase order based on the previous requests.
+
+
+## ERROR HANDLING FOR MACHINE 1 AND MACHINE 2
+
+1. Storage Temperature – Current: 65 ºC (Limit: 50 ºC)
+
+Solution:
+The storage temperature exceeds the allowed maximum of 50 ºC (Page 19). Move the Meltio M600 to an indoor, dry, climate-controlled environment where the ambient temperature remains within 0–50 ºC.
+Prolonged exposure to 65 ºC may damage electronics and cooling components, so storage conditions must be corrected immediately.
+
+2. Storage Humidity – Current: 90% (Limit: 70%)
+
+Solution:
+Humidity is far above the acceptable 70% non-condensing requirement (Page 19). Relocate the equipment to a space with controlled humidity or use a dehumidifier to reduce moisture levels.
+High humidity can cause corrosion, electrical issues, and condensation damage, so corrective actions must be taken before further storage.
+
+3. Average Power Consumption – Current: 10.5 kWh (Limit: 6 kWh)
+
+Solution:
+The machine is consuming significantly more power than the typical 4–6 kWh range stated in the specs (Page 7). Verify that the cooling system, filtration system, and environment controls are working correctly, as excessive load may increase power draw.
+If the issue persists, schedule a technical inspection to rule out component malfunction or improper operating conditions.
+
+4. Compressed Air Input – Current: 3 bar (Required: 7–8 bar)
+
+Solution:
+The compressed air supply is below the required 7–8 bar operating range (Page 7). Inspect the air supply line, compressor, or regulator to ensure proper delivery pressure.
+Insufficient air pressure may affect shielding, cooling, or operational reliability, so pressure must be restored before continuing use.
+
+5. Noise Chiller Level – Current: 115 dB (Expected: 69 dB)
+
+Solution:
+A noise level of 115 dB is far above the expected 69 dB for the chiller (Page 17). This may indicate mechanical failure, blocked airflow, or failing fans.
+Shut down the chiller and perform a maintenance inspection to prevent further damage and ensure safe operation.
+
+6. Operating Temperature – Current: 45 ºC (Limit: 30 ºC)
+
+Solution:
+The machine is being operated above the permitted 5–30 ºC range (Page 19). Excess heat increases cooling load and risks condensation when active refrigeration is running.
+Improve ventilation, add air-conditioning, or relocate the machine to a controlled environment to avoid system stress or laser-head damage.
+
+7. Machine Error – AL06 Cooling Error
+
+Solution:
+The AL06 error indicates improper cooling pressure or flow (Page 62). Follow the documented procedure: adjust the O2 sensor, probe, and door valves to 1–1.4 L/min and verify that head and gantry flow auto-regulate to approx. 8 L/min and 2.4 L/min.
+If pressure remains above 0.50 MPa, adjust the chiller bypass until stable operation at 0.45–0.48 MPa is achieved.
+
+8. Nozzle Operation Time – Current: 301 h (Limit: 300 h)
+
+Solution:
+The wire nozzle has exceeded its typical lifespan of 50–300 hours (Page 178). Replace the nozzle following the inspection and removal instructions to avoid print defects.
+Continued use past this threshold may cause beam misalignment and deposition quality issues.
+
+9. Nozzle Needs Replacement Message
+
+Solution:
+Since the operating hours exceed the recommended limit, replace the nozzle immediately following the 5-step maintenance procedure. Visually inspect the nozzle and compare it to wear levels A, B, and C to confirm the condition.
+Reinstall the shield gas nozzle after replacement to restore proper operation.
+
+10. Power Peak Consumption – Current: 11.2 kW (Limit: 10.6 kW)
+
+Solution:
+A peak consumption of 11.2 kW exceeds the typical maximum noted in the specifications (Page 38). Check the electrical installation, cable sizing, and power distribution to ensure they match the machine requirements.
+High peak draw may signal issues with the chiller, lasers, or internal electronics, and should be investigated to prevent electrical overloads.

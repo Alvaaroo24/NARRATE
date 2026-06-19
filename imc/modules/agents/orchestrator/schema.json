@@ -1,0 +1,447 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Neo4j Query API",
+    "version": "1.0",
+    "description": "This API provides endpoints to query Neo4j data, including orders, product details, and supplier information."
+  },
+  "servers": [
+    {
+      "url": "http://host.docker.internal:8012"
+    }
+  ],
+  "paths": {
+    "/orders": {
+      "get": {
+        "summary": "Get all orders",
+        "description": "Returns detailed sales order information including customer, product, and manufacturer data.",
+        "operationId": "getOrders",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved order data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdersResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No orders found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/product/{product_id}": {
+      "get": {
+        "summary": "Get product details by ID",
+        "description": "Returns detailed information for a product identified by `product_id`.",
+        "operationId": "getProductDetails",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Unique product identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/suppliers/": {
+      "get": {
+        "summary": "Get suppliers by material or component and work order",
+        "description": "Returns suppliers related to a specific Material or Product Component and Workorder ID.",
+        "operationId": "getSuppliersByMaterial",
+        "parameters": [
+          {
+            "name": "workorder_id",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "input_id",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved suppliers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuppliersResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No suppliers found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/workorders/": {
+      "get": {
+        "summary": "Get all workorders",
+        "operationId": "getAllWorkorders",
+        "responses": {
+          "200": {
+            "description": "List of all workorders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrdersResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No workorders found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/all-suppliers/": {
+      "get": {
+        "summary": "Get grouped suppliers (materials & components)",
+        "operationId": "getAllSuppliers",
+        "responses": {
+          "200": {
+            "description": "List of all suppliers grouped by material/component",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No suppliers found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/all-products/": {
+      "get": {
+        "summary": "Get all products",
+        "operationId": "getAllProducts",
+        "responses": {
+          "200": {
+            "description": "List of all products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No products found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "components": {
+    "schemas": {
+
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "detail": { "type": "string" }
+        }
+      },
+
+      "DateObject": {
+        "type": "object",
+        "properties": {
+          "_Date__ordinal": { "type": "integer" },
+          "_Date__year": { "type": "integer" },
+          "_Date__month": { "type": "integer" },
+          "_Date__day": { "type": "integer" }
+        }
+      },
+
+      "Order": {
+        "type": "object",
+        "properties": {
+          "orderID": { "type": "string" },
+          "orderDate": { "$ref": "#/components/schemas/DateObject" },
+          "requestedDelivery": { "$ref": "#/components/schemas/DateObject" },
+          "orderedQuantity": { "type": "integer" },
+          "status": { "type": "string" },
+          "priority": { "type": "string" },
+          "customerName": { "type": "string" },
+          "customerLocation": { "type": "string" },
+          "customerType": { "type": "string" },
+          "customerContactPerson": { "type": "string" },
+          "customerContactEmail": { "type": "string" },
+          "productName": { "type": "string" },
+          "productID": { "type": "string" },
+          "manufacturerName": { "type": "string" },
+          "manufacturerLocation": { "type": "string" },
+          "manufacturerCertifications": { "type": "string" },
+          "manufacturerContactPerson": { "type": "string" },
+          "manufacturerContactEmail": { "type": "string" }
+        }
+      },
+
+      "OrdersResponse": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer" },
+          "orders": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Order" }
+          }
+        }
+      },
+
+      "ProductComponent": {
+        "type": "object",
+        "properties": {
+          "productionProcess": { "type": ["string", "null"] },
+          "materialName": { "type": ["string", "null"] },
+          "materialID": { "type": ["string", "null"] },
+          "materialSuppliers": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "componentCategory": { "type": "string" },
+          "material": { "type": ["string", "null"] },
+          "componentID": { "type": "string" },
+          "componentSuppliers": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "quantityRequired": { "type": ["integer", "string"] },
+          "componentName": { "type": "string" },
+          "materialType": { "type": ["string", "null"] },
+          "dimensions": { "type": ["string", "null"] },
+          "materialOrigin": { "type": ["string", "null"] }
+        }
+      },
+
+      "ProductDetail": {
+        "type": "object",
+        "properties": {
+          "productID": { "type": "string" },
+          "productName": { "type": "string" },
+          "category": { "type": "string" },
+          "color": { "type": "string" },
+          "dimensions": { "type": "string" },
+          "safetyStandard": { "type": "string" },
+          "expectedLeadTime": { "type": "string" },
+          "unitPrice": { "type": "string" },
+          "bomID": { "type": "string" },
+          "bomVersion": { "type": "string" },
+          "bomType": { "type": "string" },
+          "bomValidFrom": { "$ref": "#/components/schemas/DateObject" },
+          "manufacturerName": { "type": "string" },
+          "manufacturerLocation": { "type": "string" },
+          "manufacturerCertifications": { "type": "string" },
+          "components": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProductComponent" }
+          }
+        }
+      },
+
+      "ProductResponse": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer" },
+          "productDetails": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProductDetail" }
+          }
+        }
+      },
+
+      "Supplier": {
+        "type": "object",
+        "properties": {
+          "itemName": { "type": "string" },
+          "supplierType": { "type": "string" },
+          "supplierName": { "type": "string" },
+          "supplierLocation": { "type": "string" },
+          "supplierCertifications": { "type": "string" },
+          "leadTime": { "type": "string" }
+        }
+      },
+
+      "SuppliersResponse": {
+        "type": "object",
+        "properties": {
+          "input_id": { "type": "string" },
+          "count": { "type": "integer" },
+          "suppliers": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Supplier" }
+          }
+        }
+      },
+
+      "WorkOrderItem": {
+        "type": "object",
+        "properties": {
+          "workOrderID": { "type": "string" },
+          "creationDate": { "type": ["string", "null"] },
+          "scheduledStart": { "type": ["string", "null"] },
+          "scheduledCompletion": { "type": ["string", "null"] },
+          "status": { "type": ["string", "null"] },
+          "quantityToProduce": { "type": ["integer", "null"] },
+          "department": { "type": ["string", "null"] },
+          "priority": { "type": ["string", "null"] },
+          "instanceID": { "type": ["string", "null"] }
+        }
+      },
+
+      "WorkOrdersResponse": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer" },
+          "workorders": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/WorkOrderItem" }
+          }
+        }
+      },
+
+      "SupplierEntry": {
+        "type": "object",
+        "properties": {
+          "itemName": { "type": ["string", "null"] },
+          "supplierID": { "type": ["string", "null"] },
+          "supplierName": { "type": ["string", "null"] },
+          "itemID": { "type": ["string", "null"] },
+          "certifications": { "type": ["string", "null"] },
+          "location": { "type": ["string", "null"] },
+          "itemType": { "type": ["string", "null"] },
+          "instanceID": { "type": ["string", "null"] },
+          "leadTimeCapability": { "type": ["string", "null"] }
+        }
+      },
+
+      "SupplierGroup": {
+        "type": "object",
+        "properties": {
+          "materialSuppliers": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SupplierEntry" }
+          },
+          "componentSuppliers": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SupplierEntry" }
+          }
+        }
+      },
+
+      "SupplierListResponse": {
+        "type": "object",
+        "properties": {
+          "suppliers": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SupplierGroup" }
+          }
+        }
+      },
+
+      "ProductItem": {
+        "type": "object",
+        "properties": {
+          "productID": { "type": "string" },
+          "productName": { "type": "string" },
+          "category": { "type": ["string", "null"] },
+          "color": { "type": ["string", "null"] },
+          "dimensions": { "type": ["string", "null"] },
+          "safetyStandard": { "type": ["string", "null"] },
+          "expectedLeadTime": { "type": ["string", "null"] },
+          "unitPrice": { "type": ["string", "null"] },
+          "instanceID": { "type": ["string", "null"] }
+        }
+      },
+
+      "ProductsResponse": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer" },
+          "products": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProductItem" }
+          }
+        }
+      }
+    }
+  }
+}
