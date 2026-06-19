@@ -1,4 +1,4 @@
 .env
-docker-compose-src
+docker-compose-src.yml
 Dockerfile
 imc.zip
