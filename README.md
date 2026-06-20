@@ -48,8 +48,7 @@ Directorio raíz del **Intelligent Manufacturing Custodian**, el centro neurálg
 ---
 
 ## Configuración del Entorno (.env)
-Para proteger los datos de NUNSYS y garantizar la estricta Seguridad Zero-Knowledge de la arquitectura, el archivo .env de producción se omite del repositorio público. Para desplegar una instancia local funcional del Intelligent Manufacturing Custodian (IMC), se debe crear un archivo .env en la raíz que defina dos grandes bloques de configuración:
+Para proteger los datos de **NUNSYS** y garantizar la estricta **Seguridad *Zero-Knowledge*** de la arquitectura, el archivo `.env` de producción se omite del repositorio público. Para desplegar una instancia local funcional del **Intelligent Manufacturing Custodian (IMC)**, se debe crear un archivo `.env` en la raíz que defina dos grandes bloques de configuración:
 
-Motor Cognitivo y Seguridad: Requiere la clave simétrica ENCRYPT_SECRET_KEY para aislar y cifrar los tokens de las APIs externas. También agrupa las credenciales de Azure OpenAI, especificando los nombres de despliegue tanto para el LLM principal (gpt-4o) como para el modelo de vectorización (embedding).
-
-Persistencia y Mensajería IoT: Define la URI de conexión a la base de datos relacional PostgreSQL (POSTGRES_URL) apuntando a la base de datos imc_db. Además, configura las credenciales de acceso al broker de mensajería asíncrona MQTT (events.bluebridgesolutions.de) y sus respectivos tópicos de alerta y respuesta para interactuar con la planta en tiempo real.
+- **Motor Cognitivo y Seguridad**: Requiere la clave simétrica `ENCRYPT_SECRET_KEY` para aislar y cifrar los *tokens* de las APIs externas. También agrupa las credenciales de Azure OpenAI, especificando los nombres de despliegue tanto para el LLM principal (`gpt-4o`) como para el modelo de vectorización (`embedding`).
+- **Persistencia y Mensajería IoT**: Define la URI de conexión a la base de datos relacional PostgreSQL (`POSTGRES_URL`) apuntando a la base de datos `imc_db`. Además, configura las credenciales de acceso al *broker* de mensajería asíncrona MQTT (`events.bluebridgesolutions.de`) y sus respectivos tópicos de alerta y respuesta para interactuar con la planta en tiempo real.
