@@ -6,7 +6,7 @@ El núcleo de este Trabajo de Fin de Grado (TFG) consolida la transición arquit
 
 ---
 
-## 📁 Estructura del Repositorio y Arquitectura de Módulos
+## Estructura del Repositorio y Arquitectura de Módulos
 
 ### `/agents`
 Punto central y núcleo computacional del TFG. Aloja el desarrollo del sistema multi-agente, organizado en una estructura de directorios funcionalmente aislados para garantizar la completa separación de contextos:
@@ -36,7 +36,7 @@ Directorio raíz del **Intelligent Manufacturing Custodian**, el centro neurálg
 
 ---
 
-## 🚀 Principios Heurísticos y Tecnológicos del Diseño
+## Principios Heurísticos y Tecnológicos del Diseño
 
 - **Colaboración Neuro-Simbólica y Autocorrección (*Self-Correction*)**: La sinergia entre el motor neuronal probabilístico (LLM) y las restricciones de un ecosistema simbólico determinista (esquemas Pydantic y *parsers* OpenAPI) dota a los agentes de capacidades de autorreparación. Si una API rechaza una llamada por un error de tipado o discrepancia de parámetros, el agente pausa el plan, resuelve la anomalía de forma autónoma consultando el inventario y reintenta la acción sin propagar el fallo al usuario.
 - **Conciencia de Esquema (*Schema Awareness*) y Política de *Zero Guessing***: El Agente Supervisor tiene estrictamente prohibido intentar adivinar, intuir o autocompletar identificadores técnicos (*IDs*). Ante cualquier entidad descrita por su nombre comercial en lenguaje natural, el orquestador está forzado por contrato a realizar primero una delegación de búsqueda a la base estructural para recuperar el ID exacto antes de operar.
@@ -44,3 +44,12 @@ Directorio raíz del **Intelligent Manufacturing Custodian**, el centro neurálg
 - **Seguridad *Zero-Knowledge* (Conocimiento Cero)**: El modelo de lenguaje opera completamente desacoplado del material criptográfico. Jamás manipula ni visualiza claves de acceso; en su lugar, interceptores perimetrales en el *pipeline* de la herramienta HTTP interactúan con un módulo criptográfico externo para descifrar en memoria volátil e inyectar de forma transparente los *tokens* de autenticación en las cabeceras de red.
 - **Introspección y Explicabilidad (XAI)**: Al finalizar cada resolución, los sub-agentes adjunten obligatoriamente una firma de auditoría detallando los *endpoints* e interfaces web realmente ejecutados (`[SYSTEM META: EXECUTED ENDPOINTS]`), dotando de total transparencia al proceso de toma de decisiones.
 - **Rendimiento Comprobado en Benchmarks**: La evaluación empírica demuestra que la arquitectura propuesta alcanza un **Task Completion Rate (TCR) del 100%** en todos los escenarios industriales complejos (frente al fracaso absoluto del 0% TCR de la versión previa monolítica), consolidando una latencia predecible, sumamente estable y con una varianza notablemente reducida.
+
+---
+
+## Configuración del Entorno (.env)
+Para proteger los datos de NUNSYS y garantizar la estricta Seguridad Zero-Knowledge de la arquitectura, el archivo .env de producción se omite del repositorio público. Para desplegar una instancia local funcional del Intelligent Manufacturing Custodian (IMC), se debe crear un archivo .env en la raíz que defina dos grandes bloques de configuración:
+
+Motor Cognitivo y Seguridad: Requiere la clave simétrica ENCRYPT_SECRET_KEY para aislar y cifrar los tokens de las APIs externas. También agrupa las credenciales de Azure OpenAI, especificando los nombres de despliegue tanto para el LLM principal (gpt-4o) como para el modelo de vectorización (embedding).
+
+Persistencia y Mensajería IoT: Define la URI de conexión a la base de datos relacional PostgreSQL (POSTGRES_URL) apuntando a la base de datos imc_db. Además, configura las credenciales de acceso al broker de mensajería asíncrona MQTT (events.bluebridgesolutions.de) y sus respectivos tópicos de alerta y respuesta para interactuar con la planta en tiempo real.
