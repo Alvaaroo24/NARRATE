@@ -32,7 +32,7 @@ Directorio donde se configura y genera la capa de interoperabilidad centralizada
 Directorio raíz del **Intelligent Manufacturing Custodian**, el centro neurálgico del proyecto NARRATE.
 - Los módulos `/api`, `/databases` (persistencia relacional PostgreSQL y vectorial ChromaDB), `/fastapi` y `/messaging` (mensajería asíncrona MQTT y RabbitMQ) ya estaban desarrollados en la Versión Anterior del IMC. Los cambios que he efectuado han sido para integrarlos con mi sistema multi-agente.
 - Del mismo modo, los módulos previos `/data_managers`, `/events` y `/llms` únicamente han sido modificados para la integración con el sistema multi-agente.
-- El módulo `/utils` ha sido modificado para crear modelos de respuesta y contexto adaptados al sistema multi-agente (esquemas de validación estrictos provistos por Pydantic que articulan el sistema simbólico), y para añadir el registro de métricas de ejecución (`ExecutionMetrics` evaluando latencia, tokens y completitud de tareas) para la evaluación.
+- El módulo `/utils` ha sido modificado para crear modelos de respuesta y contexto adaptados al sistema multi-agente (esquemas de validación estrictos provistos por Pydantic que articulan el sistema simbólico), y para añadir el registro de métricas de ejecución (`ExecutionMetrics` evaluando latencia, tokens y completitud de tareas, la Task Completion Rate se registra manualmente) para la evaluación.
 
 ---
 
