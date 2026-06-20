@@ -33,7 +33,6 @@ from fastapi import FastAPI
 
 import imc.api.plugins.routes as plugin_routes
 import imc.api.query.routes as query_routes
-import imc.api.chat.routes as chat_routes
 
 # from imc.databases.postgres.database_async import async_session_manager
 from imc.fastapi.server import create_app
@@ -94,7 +93,6 @@ start_messaging_consumer()
 app = create_app()
 app.include_router(plugin_routes.router)
 app.include_router(query_routes.router)
-app.include_router(chat_routes.router)  # estaba comentada
 
 create_chroma_db_from_txt("imc/databases/chroma_mock/mock_data.txt")
 

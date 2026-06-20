@@ -1,0 +1,98 @@
+_format_version: "3.0"
+_transform: true
+
+plugins:
+  - name: rate-limiting
+    config:
+      minute: 100    
+      policy: local
+
+  - name: correlation-id
+    config:
+      header_name: X-Request-ID
+      generator: uuid
+      echo_downstream: true 
+
+  - name: zipkin
+    config:
+      http_endpoint: http://jaeger:9411/api/v2/spans
+      sample_ratio: 1.0
+
+consumers:
+  - username: user-a
+    keyauth_credentials:
+      - key: user-a-key
+    acls:
+      - group: group-a
+
+  - username: user-bc
+    keyauth_credentials:
+      - key: user-bc-key
+    acls:
+      - group: group-bc
+
+services:
+  # --- API A (RISK) ---
+  - name: api-risk
+    url: http://host.docker.internal:1024
+    plugins:
+      - name: key-auth
+        config:
+          hide_credentials: true
+    routes:
+      - name: route-risk
+        paths:
+          - /api-risk
+        plugins:
+          - name: acl
+            config:
+              allow:
+                - group-a
+
+  # --- API B (BLUEPRINT) ---
+  - name: api-blueprint
+    url:  http://host.docker.internal:8012
+    plugins:
+      - name: key-auth
+        config:
+          hide_credentials: true
+    routes:
+      - name: route-blueprint
+        paths:
+          - /api-blueprint
+        plugins:
+          - name: acl
+            config:
+              allow:
+                - group-bc
+
+  # --- API MONSTA ---
+  - name: api-monsta
+    url: http://host.docker.internal:30000
+    plugins:
+      - name: key-auth
+        config:
+          hide_credentials: true
+    routes:
+      - name: route-monsta
+        paths:
+          - /api-monsta
+        plugins:              
+          - name: acl
+            config:
+              allow:
+                - group-a     
+
+  # --- Swagger UI ---
+  - name: swagger-ui-service
+    url: http://swagger-ui:8080 
+    routes:
+      - name: swagger-route
+        paths:
+          - /docs
+        strip_path: true 
+        
+      - name: swagger-json-route
+        paths:
+          - /openapi.json
+        strip_path: false

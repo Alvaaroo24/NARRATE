@@ -1,5 +1,3 @@
-# Copia de develop
-
 from datetime import datetime
 import enum
 from sqlalchemy import (

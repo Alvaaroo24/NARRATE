@@ -9,9 +9,7 @@ from imc.config import settings
 import chromadb
 
 
-# Obtenemos la ruta absoluta de la carpeta donde está este script
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# Unimos esa ruta con el nombre del archivo
 API_DB_NAME = os.path.join(BASE_DIR, "api_keys.db")
 
 
@@ -32,7 +30,7 @@ def init_api_db():
 
 def add_credential(service_name, key_value, header_name="apikey"):
     """Guarda una credencial en api_key.db"""
-    init_api_db()  # Asegura que la tabla exista
+    init_api_db()
     conn = sqlite3.connect(API_DB_NAME)
     c = conn.cursor()
     try:

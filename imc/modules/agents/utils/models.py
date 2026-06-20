@@ -2,7 +2,6 @@ from typing import List, Optional, Any, Dict, Union
 from pydantic import BaseModel, Field
 
 
-# --- NUEVO: Modelo de telemetría de ejecución ---
 class ExecutionMetrics(BaseModel):
     latency_seconds: float = Field(0.0, description="End-to-End Latency")
     total_tokens: int = Field(0, description="Consumo total de tokens")
@@ -31,11 +30,9 @@ class ContextModel(BaseModel):
     context_documents: Optional[List[Any]] = Field(default_factory=list)
     metrics: Optional[ExecutionMetrics] = Field(
         None, description="Métricas de evaluación del TFG"
-    )  # <-- AQUÍ ESTÁN TUS MÉTRICAS
+    )
 
 
-# 1. We redefine StepModel here to remove dependencies on deleted modules.
-# We make it generic so it supports LangGraph ToolCall metadata if you decide to save them.
 class StepModel(BaseModel):
     action: Optional[str] = Field(
         None, description="The name of the executed tool (Tool Call)."
@@ -51,21 +48,6 @@ class StepModel(BaseModel):
     )
 
 
-# class ContextModel(BaseModel):
-#     # Changed to List[Any] to tolerate the LangChain Tuple format
-#     reasoning_steps: Optional[List[Any]] = Field(
-#         default_factory=list,
-#         description="List of all reasoning and tool steps taken by the agent.",
-#     )
-#     success: Optional[bool] = Field(
-#         None, description="Whether the execution completed successfully."
-#     )
-#     error_message: Optional[str] = Field(
-#         None, description="Any error that occurred during execution."
-#     )
-#     context_documents: Optional[List[Any]] = Field(default_factory=list)
-
-
 class ResponseModel(BaseModel):
     question: str = Field(..., description="The input question to the agent.")
     answer: Optional[Any] = Field(
@@ -77,9 +59,6 @@ class ResponseModel(BaseModel):
 class QueryResponse(BaseModel):
     chat_id: Optional[int] = None
     response: Any
-
-
-# --- DATA MODELS (Data Managers) KEPT INTACT ---
 
 
 class PlanData(BaseModel):
@@ -114,4 +93,4 @@ class RiskTypeData(BaseModel):
 class EventData(BaseModel):
     id: Optional[int] = None
     payload: str
-    risk_type_id: Optional[int] = None  # <-- Now accepts nulls
+    risk_type_id: Optional[int] = None

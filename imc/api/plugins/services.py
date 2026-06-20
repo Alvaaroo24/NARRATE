@@ -3,7 +3,6 @@ from fastapi import HTTPException, status
 import psycopg2
 from sqlalchemy.orm import Session
 
-# Importamos el modelo real de la base de datos compartida
 from imc.databases.postgres.models_sqlalchemy import Plugin
 from imc.api.plugins.models import PluginCreate
 
@@ -51,13 +50,11 @@ def save_plugin_to_db(db: Session, plugin_data: PluginCreate):
     Si el plugin ya existe, actualiza sus datos en lugar de fallar.
     """
     try:
-        # 1. Comprobamos si el plugin ya existe en la BD
         existing_plugin = (
             db.query(Plugin).filter(Plugin.name == plugin_data.name).first()
         )
 
         if existing_plugin:
-            # 2. Si existe, actualizamos sus campos (Upsert)
             existing_plugin.description = plugin_data.description
             existing_plugin.base_url = plugin_data.base_url
             existing_plugin.openapi_url = plugin_data.openapi_url
@@ -67,7 +64,6 @@ def save_plugin_to_db(db: Session, plugin_data: PluginCreate):
             db.refresh(existing_plugin)
             return existing_plugin
 
-        # 3. Si no existe, lo insertamos como uno nuevo
         new_plugin = Plugin(
             name=plugin_data.name,
             description=plugin_data.description,

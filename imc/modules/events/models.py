@@ -10,7 +10,6 @@ class EventModel(BaseModel):
     event_type: str
     risk_type_id: Optional[int] = None
 
-    # Añadimos esto para conservar cualquier telemetría extra
     model_config = {"extra": "allow"}
 
 
@@ -30,7 +29,6 @@ class MessageModel(BaseModel):
     chat_id: Optional[int] = None
     user_id: Optional[int] = None
 
-    # Actualizamos el model_config para permitir campos extra
     model_config = {"populate_by_name": True, "extra": "allow"}
 
     @model_validator(mode="before")

@@ -8,16 +8,17 @@ from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Path, Body
 from pydantic import BaseModel, Field
 
-# ==============================================================================
-# 1. INICIALIZACIÓN Y ENTRENAMIENTO DEL MODELO (V5.1 - OPTIMIZADO)
-# ==============================================================================
-print("Iniciando Risk API V5.1 - Entorno Industrial con Hiperparámetros Optimizados...")
+
+import joblib
+
+print("Iniciando Risk API V5.1 - Entorno Industrial con Pipeline de Scikit-Learn...")
 
 try:
-    # Cargamos el dataset industrial V5
-    df = pd.read_csv("dataset_proveedores_muebles_IMC.csv")
-except FileNotFoundError:
-    print("ERROR FATAL: No se encuentra 'dataset_proveedores_muebles_IMC.csv'.")
+    df = pd.read_csv("dataset.csv")
+
+    pipeline_xgb = joblib.load("risk_pipeline.pkl")
+except FileNotFoundError as e:
+    print(f"ERROR FATAL: Archivo no encontrado. Detalles: {e}")
     exit()
 
 id_col = "provider_id"
@@ -25,7 +26,8 @@ target = "disruption_risk"
 PROVEEDORES_VALIDOS = set(df[id_col].unique())
 PATRON_ID = r"^[A-Z]{2}_\d{3}$"
 
-# Preparación de datos
+print("¡Pipeline V5.1 cargado con éxito!")
+
 X = df.drop(columns=[id_col, target])
 y = df[target]
 
@@ -36,7 +38,6 @@ X_train, X_test, y_train, y_test = train_test_split(
     X_encoded, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# --- NUEVOS HIPERPARÁMETROS GANADORES (ROC-AUC: 0.836) ---
 modelo_xgb = xgb.XGBClassifier(
     objective="binary:logistic",
     eval_metric="logloss",
@@ -54,15 +55,10 @@ columnas_entrenamiento = X_train.columns
 print("¡Modelo V5.1 entrenado con éxito!")
 
 
-# ==============================================================================
-# 2. MODELO DE DATOS (Basado en api.json y Suministro Industrial)
-# ==============================================================================
 class CondicionesEscenario(BaseModel):
-    # Variables Categóricas
     supply_category: Optional[str] = None
     logistics_mode: Optional[str] = None
 
-    # Métricas de Planta y Operaciones
     machinery_oee_efficiency: Optional[float] = Field(None, ge=0.0, le=1.0)
     capacity_saturation_level_pct: Optional[float] = Field(None, ge=0.0, le=100.0)
     asset_age_years: Optional[float] = Field(None, ge=0.0)
@@ -78,15 +74,11 @@ class CondicionesEscenario(BaseModel):
             }
         }
 
-    # Métricas de Suministro y Calidad
     climate_risk_index: Optional[float] = Field(None, ge=0.0, le=1.0)
     average_lead_time_days: Optional[float] = Field(None, ge=0.0)
     quality_defect_ratio_pct: Optional[float] = Field(None, ge=0.0, le=100.0)
 
 
-# ==============================================================================
-# 3. CONFIGURACIÓN DE FASTAPI Y LÓGICA DE RIESGO
-# ==============================================================================
 app = FastAPI(
     title="Risk API - Industrial Supply Chain V5.1",
     description="Motor predictivo optimizado para la detección de interrupciones en cadena de suministro.",
@@ -103,23 +95,15 @@ def _calcular_riesgo_modelo(id_input: str, condiciones_extra: dict = None) -> di
                 datos_proveedor[columna] = valor
 
     X_prov = datos_proveedor.drop(columns=[id_col, target])
-    X_prov_encoded = pd.get_dummies(
-        X_prov, columns=variables_categoricas, drop_first=True
-    )
-    # Reindexar para asegurar compatibilidad con el entrenamiento
-    X_prov_encoded = X_prov_encoded.reindex(
-        columns=columnas_entrenamiento, fill_value=0
-    )
 
-    probabilidades = modelo_xgb.predict_proba(X_prov_encoded)[:, 1]
+    probabilidades = pipeline_xgb.predict_proba(X_prov)[:, 1]
     probabilidad_media = float(np.mean(probabilidades))
 
-    # --- NUEVO UMBRAL MATEMÁTICO OPTIMIZADO (0.335) ---
     umbral_optimo = 0.335
 
     if probabilidad_media >= umbral_optimo:
         nivel = "Alto"
-    elif probabilidad_media >= (umbral_optimo * 0.6):  # Zona de precaución (aprox 20%)
+    elif probabilidad_media >= (umbral_optimo * 0.6):
         nivel = "Medio"
     else:
         nivel = "Bajo"
@@ -136,11 +120,6 @@ def _calcular_riesgo_modelo(id_input: str, condiciones_extra: dict = None) -> di
         resultado["escenario_simulado"] = condiciones_extra
 
     return resultado
-
-
-# ==============================================================================
-# 4. ENDPOINTS
-# ==============================================================================
 
 
 @app.post("/api/provider/{id_input}/simulate-risk")

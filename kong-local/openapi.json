@@ -1,0 +1,59 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API-GLOBAL",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:9000",
+      "description": "Localhost Kong Gateway"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "apikey"
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/api-risk": {
+      "get": {
+        "summary": "API RISK (Access: User A)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api-blueprint": {
+      "get": {
+        "summary": "API BLUEPRINT (Access: User BC)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api-monsta": {
+      "get": {
+        "summary": "API MONSTA (ERP Integration)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

@@ -4,15 +4,12 @@ from typing import Optional, Dict, Any, Union, List
 from langchain_core.tools import Tool, StructuredTool
 from langchain_core.messages import HumanMessage, AIMessage
 
-# from langchain_core.pydantic_v1 import BaseModel, Field
 from pydantic import BaseModel, Field
 
-# --- LANGGRAPH IMPORTS ---
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 
 
-# 1. Define the Strict Schema
 class APISchema(BaseModel):
     method: str = Field(
         ..., description="The exact HTTP method (GET, POST, PUT, DELETE)."
@@ -29,7 +26,6 @@ class APISchema(BaseModel):
     )
 
 
-# 2. SCHEMA FOR THE SUB-AGENT CALL (FROM THE SUPERVISOR)
 class AgentInput(BaseModel):
     instructions: str = Field(
         ...,
@@ -48,7 +44,6 @@ def create_specialized_agent_tool(
     Creates a Sub-agent using create_react_agent, optimized to avoid Rate Limits (429).
     """
 
-    # --- TOOL ADAPTER ---
     def tools_wrapper(
         method: str, url: str, params: dict = None, body: dict = None
     ) -> str:
@@ -64,7 +59,6 @@ def create_specialized_agent_tool(
 
     tools = [structured_api_tool]
 
-    # 2. System Prompt
     system_prompt_content = f"""You are the Specialist Agent in: {title}.
     Your internal ID is: {name}.
 
@@ -98,11 +92,8 @@ def create_specialized_agent_tool(
     Response: "MISSING ID. I do not have a search endpoint by name. ORCHESTRATOR: Use another agent to map this name to its ID and call me back."
     """
 
-    # 3. GRAPH CONSTRUCTION
-    # We use MemorySaver to handle INTRA-QUERY state (retries, reasoning loop)
     checkpointer = MemorySaver()
 
-    # create_react_agent automatically handles the Reason->Act cycle
     sub_agent_graph = create_react_agent(
         model=llm,
         tools=tools,
@@ -110,7 +101,6 @@ def create_specialized_agent_tool(
         prompt=system_prompt_content,
     )
 
-    # --- 4. TRACEABLE EXECUTION ---
     def run_sub_agent(instructions: str) -> str:
         try:
             ephemeral_thread_id = str(uuid.uuid4())
@@ -122,12 +112,9 @@ def create_specialized_agent_tool(
             inputs = {"messages": [HumanMessage(content=instructions)]}
             result = sub_agent_graph.invoke(inputs, config=config)
 
-            # 1. Get final response (natural text)
             last_message = result["messages"][-1]
             content_response = last_message.content
 
-            # 2. TECHNICAL INTROSPECTION (NEW)
-            # We iterate through the history to see which endpoints were actually called.
             executed_trace = []
             for m in result["messages"]:
                 if (
@@ -136,19 +123,14 @@ def create_specialized_agent_tool(
                     and m.tool_calls
                 ):
                     for tc in m.tool_calls:
-                        # We extract used arguments
                         args = tc.get("args", {})
                         method = args.get("method", "GET")
                         url = args.get("url", "")
-                        # We save only if there is a URL
                         if url:
                             executed_trace.append(f"{method} {url}")
 
-            # We remove duplicates while keeping the order
             unique_trace = list(dict.fromkeys(executed_trace))
 
-            # 3. Metadata Injection in the response
-            # This is what the Supervisor will see. We give it the response + the technical "cheat sheet".
             if unique_trace:
                 technical_footer = (
                     "\n\n--- [SYSTEM META: EXECUTED ENDPOINTS] ---\n"

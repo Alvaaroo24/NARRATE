@@ -6,7 +6,6 @@ from langchain_core.tools import Tool
 from imc.modules.utils.crypto import EncryptDecrypt
 from imc.config import settings
 
-# --- CORE OF DETERMINISM FROM THE ORIGINAL VERSION ---
 from langchain_community.utilities.openapi import OpenAPISpec
 from imc.modules.llms.llm import get_llm
 
@@ -74,7 +73,6 @@ def create_openapi_tool(
         auth_headers = {"Content-Type": "application/json"}
 
     def executor(payload_str: str) -> str:
-        # 1. Parsear el plan generado por el sub-agente de LangGraph
         try:
             cleaned_input = payload_str.strip()
             if cleaned_input.startswith("```"):
@@ -96,13 +94,11 @@ def create_openapi_tool(
         if not path:
             return "Error: Missing 'path' (or 'url') in the input JSON."
 
-        # Asegurar formato correcto de la URL
         full_url = f"{base_url.rstrip('/')}/{path.lstrip('/')}"
 
         logger.info(f"Executing Deterministic Request: {method} {full_url}")
 
         try:
-            # 2. Ejecución HTTP Directa (Sin LLMs intermediarios)
             response = requests.request(
                 method=method,
                 url=full_url,
@@ -120,7 +116,6 @@ def create_openapi_tool(
                     "status_code": response.status_code,
                 }
 
-            # 3. SMART FALLBACK LOGIC PRESERVADA
             api_failed_search = False
             if method == "GET" and params:
                 if isinstance(json_data, dict) and (
@@ -134,7 +129,7 @@ def create_openapi_tool(
                 logger.warning(
                     f"Activating Fallback: Downloading full list for local filtering at {path}"
                 )
-                # Petición a la misma ruta pero sin parámetros
+
                 fb_resp = requests.get(full_url, headers=auth_headers, verify=False)
                 full_data = fb_resp.json() if fb_resp.status_code == 200 else []
                 json_data = _smart_filter_data(full_data, params)
@@ -142,12 +137,9 @@ def create_openapi_tool(
             if not json_data:
                 return f"Status: {response.status_code} Success but without content/results."
 
-            # --- NUEVA LÓGICA DE INTERCEPCIÓN DE ERRORES HTTP ---
             if response.status_code >= 400:
-                # Al prefijar "Error:", garantizamos que module.py lo detecte
                 return f"Error: API returned status {response.status_code}. Details: {json_data}"
 
-            # Control de longitud (Truncamiento)
             text_out = json.dumps(json_data, separators=(",", ":"))
             MAX_CHARS = 15000
             if len(text_out) > MAX_CHARS:
@@ -158,7 +150,6 @@ def create_openapi_tool(
         except Exception as e:
             return f"Critical error executing HTTP Request: {str(e)}"
 
-    # Mantenemos tu documentación Cheat Sheet para LangGraph
     endpoints_docs = []
     paths = openapi_spec.get("paths", openapi_spec)
     if isinstance(paths, dict):

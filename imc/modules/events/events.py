@@ -1,4 +1,3 @@
-# imc/modules/events/events.py
 from imc.modules.events.models import EventModel, MessageModel
 from imc.api.query.models import QueryInput
 
@@ -26,15 +25,12 @@ def get_event_from_message(message: MessageModel) -> EventModel:
     else:
         query_text = message.alert if message.alert else "Unspecified Sensor Alert"
 
-    # Extraemos TODO el payload del mensaje original (incluyendo los campos dinámicos)
     event_data = message.model_dump()
 
-    # Sobrescribimos/Añadimos los valores procesados necesarios para el evento
     event_data["query"] = query_text
     event_data["chat_id"] = None
     event_data["user_id"] = None
 
-    # Instanciamos EventModel desempaquetando todo el diccionario
     event_model = EventModel(**event_data)
 
     return event_model

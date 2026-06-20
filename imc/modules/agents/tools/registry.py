@@ -25,12 +25,10 @@ from imc.api.plugins.services import save_plugin_to_db
 import logging
 
 
-# ADD THE IMPORT OF THE NEW TOOLS:
 from imc.modules.agents.tools.sub_agent_factory import (
     create_specialized_agent_tool,
 )
 
-# 1. We instantiate the LLM and instructions directly from the backend
 from imc.modules.llms.llm import get_llm
 from imc.modules.agents.core.react_prompt import SYSTEM_INSTRUCTIONS
 
@@ -39,15 +37,11 @@ from imc.databases.postgres.database import SessionLocal
 from imc.api.plugins.models import PluginCreate
 
 
-# --- IN-MEMORY STATE REGISTRY (Replaces cl.user_session) ---
-# In a robust production environment, this state should be managed by the LangGraph checkpointer
-# or persisted in the database to survive restarts and handle concurrent requests properly.
 _APP_STATE = {
     "fetched_specs": {},
 }
 
 
-# --- 2. CORE TOOLS WITH UNIVERSAL GUARDRAILS ---
 def reset_turn_flags():
     """
     Resets single-use locks.
@@ -85,7 +79,6 @@ def _get_relational_type(schema: dict) -> str:
 
     stype = schema.get("type", "any")
 
-    # Handling lists that contain relationships (e.g., List of Suppliers)
     if stype == "array":
         items = schema.get("items", {})
         if "$ref" in items:
@@ -113,7 +106,6 @@ def _extract_schemas_map(spec_dict: dict) -> str:
 
         props_list = []
         for key, val in properties.items():
-            # WE USE THE NEW RELATIONAL EXTRACTOR HERE
             type_str = _get_relational_type(val)
 
             required = details.get("required", [])
@@ -173,11 +165,9 @@ def _build_api_cheat_sheet(spec_dict: dict) -> str:
 
             method_str = method.upper()
 
-            # 1. Recover both summary and description
             raw_summary = meta.get("summary", "")
             raw_description = meta.get("description", "")
 
-            # 2. Prioritize description if exists
             info_text = raw_description if raw_description else raw_summary
             info_text = info_text.replace("\n", " ")[:200]
 
@@ -201,7 +191,6 @@ def _build_api_cheat_sheet(spec_dict: dict) -> str:
                 elif in_loc == "path":
                     path_params.append(f"{name}")
 
-            # --- CORRECTION: CALCULATE BODY ---
             body_hint = ""
             if "requestBody" in meta:
                 content = meta["requestBody"].get("content", {})
@@ -233,10 +222,8 @@ def _build_api_cheat_sheet(spec_dict: dict) -> str:
             is_list = method_str == "GET" and "{" not in path
             tag = " [GENERAL LISTING / SEARCH]" if is_list else ""
 
-            # --- CORRECTION: ASSEMBLE COMPLETE LINE ---
             line = f"{method_str} {path}{tag}"
 
-            # HERE WAS THE BUG! Now we inject body_hint
             if body_hint:
                 line += f" REQUIRES PAYLOAD: {body_hint}"
 
@@ -245,7 +232,6 @@ def _build_api_cheat_sheet(spec_dict: dict) -> str:
             if info_text:
                 line += f"  (Info: {info_text})"
 
-            # Add only once
             cheat_sheet.append(line)
 
     return "\n".join(cheat_sheet)
@@ -259,7 +245,6 @@ def _detect_gateway_pattern(spec_dict: dict) -> str:
     if not paths:
         return ""
 
-    # 1. Grouping by prefixes
     groups = defaultdict(int)
     for p in paths:
         parts = p.strip("/").split("/")
@@ -270,7 +255,6 @@ def _detect_gateway_pattern(spec_dict: dict) -> str:
     if len(groups) < 2:
         return ""
 
-    # 2. Security Criteria
     components = spec_dict.get("components", {})
     security_schemes = components.get("securitySchemes", {}) or spec_dict.get(
         "securityDefinitions", {}
@@ -344,14 +328,11 @@ def _determine_real_base_url(original_url: str, spec_dict: dict) -> str:
         "/v3/api-docs",
     ]
 
-    # 1. PRIORITY: Origin URL (Gateway Kong)
     for suffix in bad_suffixes:
         if clean_url.endswith(suffix):
             clean_url = clean_url[: -len(suffix)]
-            # If we managed to clean it, we know it comes from the Gateway. We use it and return immediately.
             return clean_url.rstrip("/")
 
-    # 2. FALLBACK: 'servers' from OpenAPI (Only if the URL did not have the previous suffixes)
     servers = spec_dict.get("servers", [])
     if servers and isinstance(servers, list) and "url" in servers[0]:
         server_url = servers[0]["url"]
@@ -364,11 +345,7 @@ def _determine_real_base_url(original_url: str, spec_dict: dict) -> str:
             host = f"{parsed.scheme}://{parsed.netloc}"
             return f"{host}{server_url}".rstrip("/")
 
-    # If it does not have known suffixes and no servers block, we return the original URL
     return clean_url.rstrip("/")
-
-
-# --- CORE FUNCTIONS ---
 
 
 def _get_auth_headers(identifier: str) -> dict:
@@ -383,17 +360,13 @@ def _get_auth_headers(identifier: str) -> dict:
         return headers
 
     try:
-        creds = (
-            get_all_credentials()
-        )  # Returns dict: {'risk': {'value': 'user-a-key', 'header': 'apikey'}, ...}
-
-        # We look for whether the key (e.g., 'risk') is within the identifier (e.g., 'api-risk' or 'tool_risk')
+        creds = get_all_credentials()
         for service_name, data in creds.items():
             if service_name.lower() in identifier.lower():
                 header_name = data.get("header", "apikey")
                 header_value = data.get("value")
                 headers[header_name] = header_value
-                break  # We found the credential, we break the loop
+                break
     except Exception as e:
         import logging
 
@@ -430,7 +403,6 @@ def _internal_download_spec(base_url: str, identifier: str = ""):
                         return data, target
                 except:
                     try:
-                        # Attempt 2: As YAML (NEW)
                         data = yaml.safe_load(resp.text)
                         if isinstance(data, dict) and (
                             "openapi" in data or "swagger" in data
@@ -466,13 +438,11 @@ def fetch_api_structure(url: str) -> str:
         return f"ACCESS DENIED (401/403): Requires authentication. Use `save_api_key` first."
 
     if spec:
-        # Save spec
         _APP_STATE["fetched_specs"][clean_url] = spec
 
         preview = _extract_keywords_from_spec(spec)
         title = spec.get("info", {}).get("title", "API")
 
-        # --- GATEWAY ANALYSIS ---
         gateway_analysis = _detect_gateway_pattern(spec)
 
         if not gateway_analysis:
@@ -592,7 +562,6 @@ def register_dynamic_api(json_input: str) -> str:
             f"{cheat_sheet}\n"
         )
 
-        # --- NEW: Detect if the sub-agent can actually list ---
         has_list_endpoint = False
         for p, methods in final_spec.get("paths", {}).items():
             if "get" in [m.lower() for m in methods.keys()] and "{" not in p:
@@ -603,7 +572,6 @@ def register_dynamic_api(json_input: str) -> str:
             usage_rules = f"1. GENERAL QUERIES: Use it to 'list all {keywords.split(',')[0]}', view summaries, or search without an ID.\n"
         else:
             usage_rules = f"1. STRICTLY BY ID: This agent DOES NOT HAVE ENDPOINTS to search by name or list. REQUIRES OBTAINING THE ID PREVIOUSLY from another inventory agent or database. NEVER ask it to list.\n"
-        # ----------------------------------------------------------------
 
         supervisor_description = (
             f"OFFICIAL agent for the service '{tool_name}'.\n"
@@ -620,8 +588,6 @@ def register_dynamic_api(json_input: str) -> str:
 
         final_base_url = _determine_real_base_url(base_url, final_spec)
 
-        # --- NEW: EXTRACT BASIC METADATA FOR THE DATABASE ---
-        # 1. Obtain a brief user-oriented description from the spec
         info_block = final_spec.get("info", {})
         api_title = info_block.get("title", tool_name)
         raw_desc = info_block.get("description", f"API Client for {api_title}.")
@@ -629,23 +595,18 @@ def register_dynamic_api(json_input: str) -> str:
             (raw_desc[:250] + "...") if len(raw_desc) > 250 else raw_desc
         )
 
-        # 2. Capture the exact OpenAPI (Swagger) URL
         exact_openapi_url = None
         if path_filter and "fetched_sub" in locals() and fetched_sub:
-            # If we used a sub-path, we try to derive its URL
             _, exact_openapi_url = _internal_download_spec(sub_service_url, tool_name)
 
         if not exact_openapi_url:
-            # We re-evaluate with the final base_url
             _, exact_openapi_url = _internal_download_spec(final_base_url, tool_name)
 
         if not exact_openapi_url:
-            exact_openapi_url = f"{final_base_url}/openapi.json"  # Fallback
-        # --------------------------------------------------------------
+            exact_openapi_url = f"{final_base_url}/openapi.json"
 
         llm = get_llm()
 
-        # We use empty or DB-injected auth_headers
         auth_headers = _get_auth_headers(tool_name)
 
         raw_api_tool = create_openapi_tool(
@@ -665,7 +626,6 @@ def register_dynamic_api(json_input: str) -> str:
             description=supervisor_description,
         )
 
-        # 2. Replaced cl.user_session with _APP_STATE
         curr = _APP_STATE.get("dynamic_tools", [])
         upd = [t for t in curr if t.name != agent_tool.name] + [agent_tool]
 
@@ -675,25 +635,21 @@ def register_dynamic_api(json_input: str) -> str:
         all_tools = base_tools + upd
         from imc.modules.agents.core.agent import initialize_agent
 
-        # 3. We initialize the new graph with the updated tools
         new_agent_graph, _ = initialize_agent(
             llm, tools_override=all_tools, system_instructions=SYSTEM_INSTRUCTIONS
         )
 
         _APP_STATE["executor"] = new_agent_graph
 
-        # Saved to database
         db_session = SessionLocal()
         try:
-            # 1. Create the Pydantic object with clean fields
             plugin_data = PluginCreate(
                 name=tool_name,
                 base_url=final_base_url,
-                openapi_url=exact_openapi_url,  # We save the exact path of the spec
-                description=basic_description,  # We save the friendly description
+                openapi_url=exact_openapi_url,
+                description=basic_description,
             )
 
-            # 2. Call the service passing the session and the object
             success = save_plugin_to_db(db=db_session, plugin_data=plugin_data)
             if success:
                 logger.info(f"Agent '{tool_name}' saved to the IMC Database.")
@@ -731,7 +687,6 @@ def load_plugins_from_db():
     """
     global _APP_STATE
 
-    # If we have already loaded them, we do not do it again
     if _APP_STATE.get("plugins_loaded"):
         return _APP_STATE.get("dynamic_tools", [])
 
@@ -751,16 +706,14 @@ def load_plugins_from_db():
         for plugin in saved_plugins:
             tool_name = plugin["name"]
             base_url = plugin["base_url"]
-            openapi_url = plugin.get("openapi_url")  # We get the Swagger URL
+            openapi_url = plugin.get("openapi_url")
 
-            # We prioritize openapi_url to download the spec. If it does not exist (old plugins), we use base_url
             target_url = openapi_url if openapi_url else base_url
 
             logger.info(
                 f"Rehydrating plugin from DB: {tool_name} (API: {base_url} | Spec: {target_url})"
             )
 
-            # 1. We download the spec again using the priority exact URL
             spec, _ = _internal_download_spec(target_url, tool_name)
 
             if not spec:
@@ -769,12 +722,10 @@ def load_plugins_from_db():
                 )
                 continue
 
-            # 2. We rebuild internal documents
             keywords = _extract_keywords_from_spec(spec)
             schema_map = _extract_schemas_map(spec)
             cheat_sheet = _build_api_cheat_sheet(spec)
 
-            # --- Rebuild Supervisor Description with Schemas ---
             has_list_endpoint = False
             for p, methods in spec.get("paths", {}).items():
                 if "get" in [m.lower() for m in methods.keys()] and "{" not in p:
@@ -798,7 +749,6 @@ def load_plugins_from_db():
                 f"3. FILTERS: If you search by name/tag, tell it.\n"
                 f"Do not ask the user for new URLs if the question is about these topics. USE THIS AGENT."
             )
-            # --------------------------------------------------------
 
             rich_internal_doc = (
                 f"--- API KNOWLEDGE FOR {tool_name.upper()} ---\n"
@@ -817,7 +767,6 @@ def load_plugins_from_db():
             )
             auth_headers = _get_auth_headers(tool_name)
 
-            # 3. We recreate the HTTP tool and the Agent
             raw_api_tool = create_openapi_tool(
                 name=f"http_client_{tool_name}",
                 base_url=base_url,
@@ -838,7 +787,6 @@ def load_plugins_from_db():
             loaded_tools.append(agent_tool)
             logger.info(f"Plugin {tool_name} successfully loaded into memory.")
 
-        # Save to global state
         _APP_STATE["dynamic_tools"] = loaded_tools
         _APP_STATE["plugins_loaded"] = True
         return loaded_tools
@@ -855,8 +803,6 @@ def get_initial_tools():
         StructuredTool.from_function(fetch_api_structure),
         StructuredTool.from_function(register_dynamic_api),
     ]
-    # 2. Recover dynamic ones from DB (will only consult Postgres the first time)
     dynamic_tools = load_plugins_from_db()
 
-    # 3. Return the complete arsenal
     return static_tools + dynamic_tools

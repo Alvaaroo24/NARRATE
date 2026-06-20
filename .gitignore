@@ -1,4 +1,4 @@
-.env
-docker-compose-src.yml
 Dockerfile
 imc.zip
+dataset.csv
+risk_pipeline.pkl
