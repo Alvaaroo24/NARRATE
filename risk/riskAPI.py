@@ -28,32 +28,6 @@ PATRON_ID = r"^[A-Z]{2}_\d{3}$"
 
 print("¡Pipeline V5.1 cargado con éxito!")
 
-X = df.drop(columns=[id_col, target])
-y = df[target]
-
-variables_categoricas = ["supply_category", "logistics_mode"]
-X_encoded = pd.get_dummies(X, columns=variables_categoricas, drop_first=True)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X_encoded, y, test_size=0.2, random_state=42, stratify=y
-)
-
-modelo_xgb = xgb.XGBClassifier(
-    objective="binary:logistic",
-    eval_metric="logloss",
-    n_estimators=200,
-    max_depth=4,
-    learning_rate=0.05,
-    subsample=0.8,
-    colsample_bytree=0.8,
-    scale_pos_weight=1,
-    random_state=42,
-)
-modelo_xgb.fit(X_train, y_train)
-columnas_entrenamiento = X_train.columns
-
-print("¡Modelo V5.1 entrenado con éxito!")
-
 
 class CondicionesEscenario(BaseModel):
     supply_category: Optional[str] = None

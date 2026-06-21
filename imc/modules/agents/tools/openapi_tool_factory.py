@@ -12,54 +12,6 @@ from imc.modules.llms.llm import get_llm
 logger = logging.getLogger(__name__)
 
 
-def get_decrypted_headers(auth_type: str, encrypted_auth_params: bytes) -> dict:
-    """Decrypts stored credentials."""
-    headers = {"Content-Type": "application/json", "Accept": "application/json"}
-    if not encrypted_auth_params or not auth_type:
-        return headers
-    try:
-        secret_key = settings.encrypt_secret_key
-        decrypted = EncryptDecrypt.decrypt_secret_key(
-            encrypted_auth_params, secret_key=secret_key
-        )
-        parsed = json.loads(decrypted.replace("'", '"'))
-        if auth_type == "bearer_token":
-            headers["Authorization"] = f"Bearer {parsed.get('bearer_token')}"
-        elif auth_type == "api_key":
-            h_name = parsed.get("header_name", "apikey")
-            headers[h_name] = parsed.get("api_key")
-    except Exception as e:
-        logger.error(f"Critical error decrypting credentials: {e}")
-    return headers
-
-
-def _smart_filter_data(data, params):
-    """Recursively filters lists based on search parameters."""
-    if not params:
-        return data
-    search_terms = [str(v).lower() for v in params.values() if v]
-    if not search_terms:
-        return data
-    if isinstance(data, list):
-        filtered_list = []
-        for item in data:
-            item_str = json.dumps(item).lower()
-            if any(term in item_str for term in search_terms):
-                filtered_list.append(item)
-        return filtered_list
-    elif isinstance(data, dict):
-        new_dict = {}
-        for k, v in data.items():
-            if isinstance(v, (list, dict)):
-                filtered_v = _smart_filter_data(v, params)
-                if filtered_v:
-                    new_dict[k] = filtered_v
-            else:
-                new_dict[k] = v
-        return new_dict
-    return data
-
-
 def create_openapi_tool(
     *,
     name: str,
@@ -115,27 +67,6 @@ def create_openapi_tool(
                     "raw_text": response.text,
                     "status_code": response.status_code,
                 }
-
-            api_failed_search = False
-            if method == "GET" and params:
-                if isinstance(json_data, dict) and (
-                    "error" in str(json_data).lower() or response.status_code == 404
-                ):
-                    api_failed_search = True
-                elif isinstance(json_data, list) and len(json_data) == 0:
-                    api_failed_search = True
-
-            if api_failed_search:
-                logger.warning(
-                    f"Activating Fallback: Downloading full list for local filtering at {path}"
-                )
-
-                fb_resp = requests.get(full_url, headers=auth_headers, verify=False)
-                full_data = fb_resp.json() if fb_resp.status_code == 200 else []
-                json_data = _smart_filter_data(full_data, params)
-
-            if not json_data:
-                return f"Status: {response.status_code} Success but without content/results."
 
             if response.status_code >= 400:
                 return f"Error: API returned status {response.status_code}. Details: {json_data}"

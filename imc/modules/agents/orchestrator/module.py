@@ -239,22 +239,6 @@ class OrchestratorAgent:
 
             plan_instructions = response_plan.instructions
 
-            if "__SCHEMA__" in plan_instructions:
-                try:
-                    with open(
-                        "imc/modules/agents/orchestrator/schema.json",
-                        "r",
-                        encoding="utf-8",
-                    ) as file:
-                        data = json.load(file)
-                    schema_string = json.dumps(data)
-
-                    plan_instructions = plan_instructions.replace(
-                        "__SCHEMA__", schema_string
-                    )
-                except Exception as e:
-                    print(f"Error injecting schema into plan: {e}")
-
             risk_type_data = RiskTypeData(
                 id=risk_type.id,
                 name=risk_type.name,

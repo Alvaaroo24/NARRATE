@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import xgboost as xgb
 import shap
+import joblib
+
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
@@ -40,8 +42,9 @@ def calculate_ece(y_true, y_prob, n_bins=10):
     return np.sum(bin_weights * np.abs(bin_true - bin_preds))
 
 
-print("1. Cargando datos y entrenando Pipelines limpios...")
-df = pd.read_csv("dataset_proveedores_muebles_IMC.csv")
+print("1. Cargando datos y capturando Pipeline XGBoost optimizado...")
+
+df = pd.read_csv("dataset.csv")
 
 X = df.drop(columns=["provider_id", "disruption_risk"])
 y = df["disruption_risk"]
@@ -71,42 +74,12 @@ modelo_lr = Pipeline(
     ]
 )
 
-prep_xgb = ColumnTransformer(
-    transformers=[
-        (
-            "cat",
-            OneHotEncoder(drop="first", handle_unknown="ignore", sparse_output=False),
-            variables_categoricas,
-        )
-    ],
-    remainder="passthrough",
-)
-
-modelo_xgb = Pipeline(
-    [
-        ("prep", prep_xgb),
-        (
-            "clf",
-            xgb.XGBClassifier(
-                objective="binary:logistic",
-                eval_metric="logloss",
-                n_estimators=200,
-                max_depth=4,
-                learning_rate=0.05,
-                subsample=0.8,
-                colsample_bytree=0.8,
-                scale_pos_weight=1,
-                random_state=42,
-            ),
-        ),
-    ]
-)
-
 print(" -> Entrenando Baseline (Regresión Logística)...")
 modelo_lr.fit(X_train, y_train)
 
-print(" -> Entrenando Modelo Principal (XGBoost)...")
-modelo_xgb.fit(X_train, y_train)
+print(" -> Cargando XGBoost desde 'risk_pipeline.pkl' (No requiere fit)...")
+modelo_xgb = joblib.load("risk_pipeline.pkl")
+
 
 y_prob_lr = modelo_lr.predict_proba(X_test)[:, 1]
 y_prob_xgb = modelo_xgb.predict_proba(X_test)[:, 1]
@@ -115,18 +88,17 @@ UMBRAL_OPTIMO = 0.335
 y_pred_lr = (y_prob_lr >= UMBRAL_OPTIMO).astype(int)
 y_pred_xgb = (y_prob_xgb >= UMBRAL_OPTIMO).astype(int)
 
-
 print("\n=== ANÁLISIS DE RENDIMIENTO COMPARATIVO (Test Set) ===")
 
 pr_auc_xgb = average_precision_score(y_test, y_prob_xgb)
-roc_auc_xgb = roc_auc_score(y_test, y_prob_xgb)  # Nuevo
+roc_auc_xgb = roc_auc_score(y_test, y_prob_xgb)
 precision_xgb = precision_score(y_test, y_pred_xgb, zero_division=0)
 recall_xgb = recall_score(y_test, y_pred_xgb)
 f2_score_xgb = fbeta_score(y_test, y_pred_xgb, beta=2)
 ece_xgb = calculate_ece(y_test, y_prob_xgb)
 
 pr_auc_lr = average_precision_score(y_test, y_prob_lr)
-roc_auc_lr = roc_auc_score(y_test, y_prob_lr)  # Nuevo
+roc_auc_lr = roc_auc_score(y_test, y_prob_lr)
 precision_lr = precision_score(y_test, y_pred_lr, zero_division=0)
 recall_lr = recall_score(y_test, y_pred_lr)
 f2_score_lr = fbeta_score(y_test, y_pred_lr, beta=2)
@@ -138,7 +110,7 @@ print(
     f"{'ROC-AUC':<12} | {roc_auc_xgb:<10.4f} | {roc_auc_lr:<15.4f} | Área bajo la curva ROC (Capacidad general)"
 )
 print(
-    f"{'PR-AUC':<12} | {pr_auc_xgb:<10.4f} | {pr_auc_lr:<15.4f} | Área curva Precision-Recall (Específico para minoritaria)"
+    f"{'PR-AUC':<12} | {pr_auc_xgb:<10.4f} | {pr_auc_lr:<15.4f} | Área curva Precision-Recall (Específico minoritaria)"
 )
 print(
     f"{'F2-Score':<12} | {f2_score_xgb:<10.4f} | {f2_score_lr:<15.4f} | Balance penalizando FN (Mayor es mejor)"
@@ -153,8 +125,7 @@ print(
     f"{'ECE':<12} | {ece_xgb:<10.4f} | {ece_lr:<15.4f} | Error de calibración (Menor es mejor)"
 )
 
-
-print("\nGenerando gráficos individuales...")
+print("\nGenerando gráficos...")
 plt.style.use("seaborn-v0_8-whitegrid")
 
 plt.figure(figsize=(8, 6))
@@ -192,6 +163,7 @@ plt.legend()
 plt.tight_layout()
 plt.savefig("grafico_01_curva_pr.png", dpi=300)
 plt.close()
+
 plt.figure(figsize=(8, 6))
 fpr_xgb, tpr_xgb, _ = roc_curve(y_test, y_prob_xgb)
 fpr_lr, tpr_lr, _ = roc_curve(y_test, y_prob_lr)
@@ -271,7 +243,6 @@ plt.tight_layout()
 plt.savefig("grafico_04_calibracion.png", dpi=300)
 plt.close()
 
-print(" -> Generando KDE Plot de Probabilidades...")
 plt.figure(figsize=(9, 6))
 
 prob_seguro = y_prob_xgb[y_test == 0]
@@ -317,13 +288,12 @@ plt.tight_layout()
 plt.savefig("grafico_05_distribucion_kde.png", dpi=300)
 plt.close()
 
-print("\nGenerando SHAP Summary Plot para XGBoost...")
+print(" -> Generando SHAP Summary Plot para XGBoost...")
 
-estimador_xgb = modelo_xgb.named_steps["clf"]
+estimador_xgb = modelo_xgb.named_steps["xgb"]
 preprocesador_xgb = modelo_xgb.named_steps["prep"]
 
 X_test_preprocesado = preprocesador_xgb.transform(X_test)
-
 nombres_features = preprocesador_xgb.get_feature_names_out()
 
 explainer = shap.TreeExplainer(estimador_xgb)
@@ -339,5 +309,7 @@ shap.summary_plot(
 )
 plt.title("Impacto de las Variables en el Riesgo (Valores SHAP)", fontsize=14)
 plt.tight_layout()
-plt.savefig("grafico_05_shap_summary.png", dpi=300)
+plt.savefig("grafico_06_shap_summary.png", dpi=300)
 plt.close()
+
+print("\n¡Evaluación completada! Gráficos 01 al 06 generados con éxito.")

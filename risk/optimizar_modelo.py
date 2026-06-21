@@ -39,18 +39,15 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 import joblib
 
-# 1. Quitar las variables objetivo e ID, manteniendo las categóricas intactas
 X = df.drop(columns=["provider_id", "disruption_risk"])
 y = df["disruption_risk"]
 
 variables_categoricas = ["supply_category", "logistics_mode"]
 
-# 2. Hacer el split ANTES de cualquier transformación
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# 3. Definir el preprocesador encapsulado
 preprocesador = ColumnTransformer(
     transformers=[
         (
@@ -62,7 +59,6 @@ preprocesador = ColumnTransformer(
     remainder="passthrough",
 )
 
-# 4. Crear el Pipeline completo
 pipeline = Pipeline(
     [
         ("prep", preprocesador),
@@ -70,7 +66,6 @@ pipeline = Pipeline(
     ]
 )
 
-# 5. Adaptar el espacio de parámetros añadiendo el prefijo 'xgb__'
 ratio_desbalanceo = (len(y_train) - sum(y_train)) / sum(y_train)
 espacio_parametros = {
     "xgb__max_depth": [3, 4, 5, 6],
@@ -78,10 +73,9 @@ espacio_parametros = {
     "xgb__n_estimators": [100, 200, 300],
     "xgb__subsample": [0.7, 0.8, 0.9, 1.0],
     "xgb__colsample_bytree": [0.7, 0.8, 0.9, 1.0],
-    "xgb__scale_pos_weight": [1, ratio_desbalanceo, ratio_desbalanceo * 1.5],
+    "xgb__scale_pos_weight": [1],
 }
 
-# 6. Entrenar el Pipeline
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 busqueda_aleatoria = RandomizedSearchCV(
     estimator=pipeline,
@@ -98,7 +92,6 @@ busqueda_aleatoria = RandomizedSearchCV(
 busqueda_aleatoria.fit(X_train, y_train)
 mejor_modelo = busqueda_aleatoria.best_estimator_
 
-# 7. Guardar el Pipeline completo en disco al final del script
 joblib.dump(mejor_modelo, "risk_pipeline.pkl")
 print("Mejores Hiperparámetros encontrados en Train:")
 for param, valor in busqueda_aleatoria.best_params_.items():
