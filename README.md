@@ -36,7 +36,7 @@ Contiene el código en el que se sustenta el **Módulo de Analítica y Estimaci�
 Componente intermediario que aísla perimetralmente el núcleo de Inteligencia Artificial.
 - `imc_proxy.py`: Proxy inverso que canaliza las peticiones de la plataforma de monitorización, realiza la validación determinista de sesión mediante inyección de dependencias (`get_current_user`) y asocia el identificador verificado del operador antes de conectar con la red interna del motor de IA. Unifica los mensajes directos de chat y los flujos asíncronos de alertas físicas de la planta vía MQTT.
 
-### 5. `/evaluacion` (Framework de Benchmarking y Auditoría E2E)
+### 5. `/evaluation` (Framework de Benchmarking y Auditoría E2E)
 Módulo dedicado a la validación cuantitativa del rendimiento, la estabilidad de respuesta y la explicabilidad del sistema síncrono:
 - `evaluacion_analitica.py`: Suite de auditoría de Machine Learning que enfrenta el modelo XGBoost optimizado contra un *Baseline* de Regresión Logística. Ejecuta un análisis de rendimiento en el *Test Set* calculando el Error de Calibración Esperado (*Expected Calibration Error* - ECE) y fijando el umbral de decisión operativo en **0.335**. Genera de forma automatizada seis artefactos gráficos de diagnóstico (`grafico_01` al `06`) que incluyen curvas PR/ROC, matrices de confusión, curvas de calibración, densidades KDE y explicabilidad global mediante valores **SHAP**.
 - `evaluator.py`: Orquestador de *benchmarking* automatizado que somete el *endpoint* síncrono del IMC (`/query`) a un test de estrés de **80 peticiones End-to-End** (4 escenarios industriales complejos de NARRATE sometidos a 20 iteraciones cada uno). Compila los resultados en dos entregables de auditoría:
