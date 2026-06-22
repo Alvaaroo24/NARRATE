@@ -8,7 +8,7 @@ El núcleo de este Trabajo de Fin de Grado (TFG) consolida la transición arquit
 
 ## Estructura del Repositorio y Arquitectura de Módulos
 
-La topología del repositorio refleja la estricta segregación de responsabilidades del diseño arquitectónico en cuatro grandes pilares:
+La topología del repositorio refleja la estricta segregación de responsabilidades del diseño arquitectónico en cinco grandes pilares:
 
 ### 1. `/agents` (Núcleo Computacional Multi-Agente)
 Punto central y núcleo computacional del TFG. Aloja el desarrollo del sistema multi-agente, organizado en una estructura de directorios funcionalmente aislados para garantizar la completa separación de contextos:
@@ -36,19 +36,35 @@ Contiene el código en el que se sustenta el **Módulo de Analítica y Estimaci�
 Componente intermediario que aísla perimetralmente el núcleo de Inteligencia Artificial.
 - `imc_proxy.py`: Proxy inverso que canaliza las peticiones de la plataforma de monitorización, realiza la validación determinista de sesión mediante inyección de dependencias (`get_current_user`) y asocia el identificador verificado del operador antes de conectar con la red interna del motor de IA. Unifica los mensajes directos de chat y los flujos asíncronos de alertas físicas de la planta vía MQTT.
 
+### 5. `/evaluacion` (Framework de Benchmarking y Auditoría E2E)
+Módulo dedicado a la validación cuantitativa del rendimiento, la estabilidad de respuesta y la explicabilidad del sistema síncrono:
+- `evaluacion_analitica.py`: Suite de auditoría de Machine Learning que enfrenta el modelo XGBoost optimizado contra un *Baseline* de Regresión Logística. Ejecuta un análisis de rendimiento en el *Test Set* calculando el Error de Calibración Esperado (*Expected Calibration Error* - ECE) y fijando el umbral de decisión operativo en **0.335**. Genera de forma automatizada seis artefactos gráficos de diagnóstico (`grafico_01` al `06`) que incluyen curvas PR/ROC, matrices de confusión, curvas de calibración, densidades KDE y explicabilidad global mediante valores **SHAP**.
+- `evaluator.py`: Orquestador de *benchmarking* automatizado que somete el *endpoint* síncrono del IMC (`/query`) a un test de estrés de **80 peticiones End-to-End** (4 escenarios industriales complejos de NARRATE sometidos a 20 iteraciones cada uno). Compila los resultados en dos entregables de auditoría:
+  1. `evaluacion_multiagente_api_METRICAS-FINALES.xlsx`: Matriz de telemetría que registra latencias, consumo de tokens, longitud de trayectoria de pasos, conteos de recuperación de errores y la tasa de acciones válidas.
+  2. `evaluacion_reasoning_steps_METRICAS-FINALES.json`: Volcado de memoria que audita y serializa el hilo de pensamiento interior (*reasoning logs*) de cada agente involucrado.
+
 ---
 
 ## Características Principales y Rendimiento
 
 - **Razonamiento ReAct y Conciencia de Esquema (*Schema Awareness*)**: Implementación estricta de resolución previa de identificadores unívocos para erradicar las alucinaciones en los parámetros de red.
 - **Protocolo de Autocorrección (*Self-Correction*)**: Capacidad de atrapar errores de API en tiempo de ejecución y subsanar dinámicamente el mapeo de entidades sin interrumpir el flujo.
-- **Rendimiento Comprobado en Benchmarks**: La evaluación empírica demuestra que la arquitectura propuesta alcanza un **Task Completion Rate (TCR) del 100%** en todos los escenarios industriales complejos (frente al fracaso absoluto del 0% TCR de la versión previa monolítica), consolidando una latencia predecible, sumamente estable y con una varianza notablemente reducida.
+- **Eficacia Cognitiva Perfecta (100% TCR)**: La evaluación empírica a través de las 80 ejecuciones de `evaluator.py` demuestra un **Task Completion Rate del 100%** en todos los escenarios de estrés (frente al fracaso absoluto del 0% de la versión previa monolítica), logrando una latencia sumamente estable y con varianza reducida ante:
+  1. *Exploración Dinámica* (Múltiples proveedores en paralelo).
+  2. *Plan de Respuesta Estricto* (Acatamiento de *System Override* por rotura de stock).
+  3. *Improvisación ante Plan Incompleto* (Cálculo alternativo de rutas y ordenación por SLA).
+  4. *Recomendación Condicionada* (Análisis predictivo *What-If* alterando saturación e índices climáticos).
+- **Calibración Predictiva de Alta Sensibilidad**: El análisis de `evaluacion_analitica.py` demuestra que situar el corte operativo en un umbral estricto de **0.335** optimiza el *F2-Score*, penalizando severamente los Falsos Negativos (omisión de alertas de interrupción logística reales) sin saturar al operador de falsas alarmas.
 
 ---
 
-## Configuración del Entorno (.env)
+## Reproducción de la Auditoría de Sistema
 
-Para proteger los datos de **NUNSYS** y garantizar la ciberseguridad de la red, el archivo `.env` de producción se omite del repositorio público. Para desplegar una instancia local funcional del **Intelligent Manufacturing Custodian (IMC)**, se debe crear un archivo `.env` en la raíz que defina la configuración sensible gestionada centralizadamente mediante `pydantic_settings`:
+Para replicar la batería de pruebas empíricas y regenerar los entregables de validación, ejecuta desde el directorio raíz:
 
-- **Motor Cognitivo Azure OpenAI**: Define las credenciales y claves de acceso (`AZURE_OPENAI_API_KEY`), especificando los nombres de despliegue tanto para el LLM principal (`gpt-4o`) como para el modelo de vectorización (`embedding`).
-- **Persistencia y Mensajería IoT**: Define la URI de conexión a la base de datos relacional PostgreSQL (`POSTGRES_URL`) apuntando a la base de datos `imc_db`. Además, configura las credenciales de acceso al *broker* de mensajería asíncrona MQTT y sus respectivos tópicos de alerta y respuesta para interactuar con la planta en tiempo real.
+```bash
+# 1. Generar los 6 gráficos de diagnóstico del motor predictivo y explicabilidad SHAP
+python evaluacion_analitica.py
+
+# 2. Lanzar el benchmark de estrés E2E del Orquestador Multi-Agente (Genera Excel y JSON)
+python evaluator.py
