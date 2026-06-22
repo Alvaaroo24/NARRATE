@@ -45,20 +45,7 @@ Módulo dedicado a la validación cuantitativa del rendimiento, la estabilidad d
 
 ---
 
-## Características Principales y Rendimiento
-
-- **Razonamiento ReAct y Conciencia de Esquema (*Schema Awareness*)**: Implementación estricta de resolución previa de identificadores unívocos para erradicar las alucinaciones en los parámetros de red.
-- **Protocolo de Autocorrección (*Self-Correction*)**: Capacidad de atrapar errores de API en tiempo de ejecución y subsanar dinámicamente el mapeo de entidades sin interrumpir el flujo.
-- **Eficacia Cognitiva Perfecta (100% TCR)**: La evaluación empírica a través de las 80 ejecuciones de `evaluator.py` demuestra un **Task Completion Rate del 100%** en todos los escenarios de estrés (frente al fracaso absoluto del 0% de la versión previa monolítica), logrando una latencia sumamente estable y con varianza reducida ante:
-  1. *Exploración Dinámica* (Múltiples proveedores en paralelo).
-  2. *Plan de Respuesta Estricto* (Acatamiento de *System Override* por rotura de stock).
-  3. *Improvisación ante Plan Incompleto* (Cálculo alternativo de rutas y ordenación por SLA).
-  4. *Recomendación Condicionada* (Análisis predictivo *What-If* alterando saturación e índices climáticos).
-- **Calibración Predictiva de Alta Sensibilidad**: El análisis de `evaluacion_analitica.py` demuestra que situar el corte operativo en un umbral estricto de **0.335** optimiza el *F2-Score*, penalizando severamente los Falsos Negativos (omisión de alertas de interrupción logística reales) sin saturar al operador de falsas alarmas.
-
----
-
-## Reproducción de la Auditoría de Sistema
+## Auditoría de Sistema
 
 Para replicar la batería de pruebas empíricas y regenerar los entregables de validación, ejecuta desde el directorio raíz:
 
